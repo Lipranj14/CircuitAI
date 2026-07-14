@@ -85,6 +85,20 @@ By leveraging the cutting-edge **Gemini 2.5 Flash** Vision-Language Model, Circu
 
 ---
 
+## 📸 Gallery
+
+![Dashboard Overview](assets/dashboard.png)
+*Complete view of the Circuit AI Dashboard.*
+
+![Left Panel](assets/left_panel.png)
+*Interactive graph editor and simulation controls.*
+
+![Right Panel](assets/right_panel.png)
+*Real-time component properties and AI Tutor side-panel.*
+
+![Status Bar](assets/status_bar.png)
+*VLM pipeline progress, component counter, and simulation status.*
+
 ---
 
 ## 🤝 Contributing

@@ -4,7 +4,7 @@ Circuit AI Tutor is an advanced, AI-powered educational platform designed for el
 
 By leveraging the cutting-edge **Gemini 2.5 Flash** Vision-Language Model, Circuit AI effortlessly bridges the gap between rough sketches and SPICE-level simulation.
 
-![Dashboard Preview](assets/dashboard.png) *(Add your dashboard screenshot here!)*
+![Dashboard Preview](assets/landing_page.png)
 
 ---
 
@@ -84,14 +84,6 @@ By leveraging the cutting-edge **Gemini 2.5 Flash** Vision-Language Model, Circu
 4. Open your browser to `http://localhost:5173`.
 
 ---
-
-## 📸 Gallery
-
-![Detection Pipeline](assets/detection.png)
-*AI-powered bounding box and graph extraction.*
-
-![Interactive Tutor](assets/tutor.png)
-*Asking the AI Tutor about Kirchhoff's Voltage Law.*
 
 ---
 

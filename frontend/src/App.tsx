@@ -618,28 +618,6 @@ function App() {
                  <Upload size={22} className="shrink-0" />
                  <span>Upload a circuit to get started</span>
                </button>
-
-               {/* Sample Circuits Grid */}
-               <div className="w-full max-w-3xl">
-                 <h3 className="text-sm font-semibold tracking-widest uppercase text-slate-500 mb-6 text-center">Or try a sample circuit</h3>
-                 <div className="grid grid-cols-3 gap-6">
-                   {[1, 2, 3].map((num) => (
-                     <button
-                       key={num}
-                       disabled={backendStatus !== 'ready'}
-                       onClick={() => loadSample(num)}
-                       className="group relative aspect-video rounded-xl overflow-hidden border border-slate-700/50 bg-slate-800/50 hover:border-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                     >
-                       <img src={`/samples/sample${num}.jpg`} alt={`Sample ${num}`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80" />
-                       <span className="absolute bottom-3 left-3 text-sm font-medium text-white shadow-sm flex items-center gap-2">
-                         <Zap size={14} className="text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity -ml-4 group-hover:ml-0" />
-                         Sample {num}
-                       </span>
-                     </button>
-                   ))}
-                 </div>
-               </div>
              </div>
           )}
 

@@ -28,5 +28,8 @@ pydantic>=2.9.0
 # --- Config ---
 python-dotenv>=1.0.0
 
+# --- GenAI ---
+google-genai>=0.2.0
+
 # --- Simulation (existing) ---
 PySpice>=1.5

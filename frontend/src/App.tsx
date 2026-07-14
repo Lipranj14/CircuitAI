@@ -4,7 +4,7 @@ import { useStore } from './store/useStore';
 import { TutorChatPanel } from './components/TutorChatPanel';
 import { SimulationControls } from './components/SimulationControls';
 import { RepairPanel } from './components/RepairPanel';
-import { apiClient } from './api';
+import { apiClient, API_BASE_URL } from './api';
 import { CircuitViewer } from './components/CircuitViewer';
 import { PipelineProgress } from './components/PipelineProgress';
 import { PropertiesPanel } from './components/PropertiesPanel';
@@ -39,6 +39,72 @@ function App() {
   const [uploadTab, setUploadTab] = React.useState<'image' | 'netlist'>('image');
   const [netlistInput, setNetlistInput] = React.useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const [backendStatus, setBackendStatus] = React.useState<'checking' | 'ready' | 'error'>('checking');
+  const [backendErrorMsg, setBackendErrorMsg] = React.useState('Connecting to AI engine...');
+
+  React.useEffect(() => {
+    let isMounted = true;
+    const startTime = Date.now();
+    const healthUrl = API_BASE_URL.replace('/api', '/');
+    
+    // Initial 3 seconds: "Connecting to AI engine..."
+    // After 3 seconds: "Backend is starting up, please wait 30 seconds and try again"
+    const timer = setTimeout(() => {
+      if (isMounted && backendStatus === 'checking') {
+        setBackendErrorMsg('Backend is starting up, please wait 30 seconds and try again');
+      }
+    }, 3000);
+
+    const checkHealth = async () => {
+      try {
+        const res = await fetch(healthUrl, { method: 'GET' });
+        if (res.ok) {
+          if (isMounted) setBackendStatus('ready');
+          return true;
+        }
+      } catch (err) {
+        // failed
+      }
+      return false;
+    };
+
+    const poll = async () => {
+      while (isMounted && backendStatus === 'checking') {
+        const isReady = await checkHealth();
+        if (isReady) break;
+        
+        if (Date.now() - startTime > 30000) {
+          // If 30 seconds pass, it's a hard error
+          if (isMounted) {
+            setBackendStatus('error');
+            setBackendErrorMsg('Backend is starting up, please wait 30 seconds and try again');
+          }
+          break;
+        }
+        await new Promise(r => setTimeout(r, 2000));
+      }
+    };
+
+    poll();
+    
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const loadSample = async (sampleNum: number) => {
+    if (backendStatus !== 'ready') return;
+    try {
+      const response = await fetch(`/samples/sample${sampleNum}.jpg`);
+      const blob = await response.blob();
+      const file = new File([blob], `sample${sampleNum}.jpg`, { type: 'image/jpeg' });
+      handleUpload(file);
+    } catch (err) {
+      console.error('Failed to load sample', err);
+    }
+  };
 
   const friendlyError = (err: any): { message: string; hint: string } => {
     const msg = err?.message || String(err);
@@ -519,23 +585,61 @@ function App() {
         <div className="flex-1 relative">
           {/* WELCOME STATE */}
           {!circuitJson && !isUploading && !uploadError && (
-             <div className="absolute inset-0 flex flex-col items-center justify-center text-[var(--nixt-text-dim)]">
-               <div className="relative mb-8">
+             <div className="absolute inset-0 flex flex-col items-center justify-center text-[var(--nixt-text-dim)] px-4">
+               
+               {/* Backend Status Notification */}
+               {backendStatus !== 'ready' && (
+                 <div className="absolute top-8 bg-slate-900/80 backdrop-blur border border-slate-700 px-6 py-3 rounded-full flex items-center gap-3 shadow-lg max-w-md w-full animate-pulse">
+                   {backendStatus === 'checking' ? (
+                     <div className="w-5 h-5 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin shrink-0" />
+                   ) : (
+                     <AlertTriangle className="text-amber-500 shrink-0" size={20} />
+                   )}
+                   <span className={`text-sm font-medium ${backendStatus === 'error' ? 'text-amber-400' : 'text-cyan-400'}`}>
+                     {backendErrorMsg}
+                   </span>
+                 </div>
+               )}
+
+               <div className="relative mb-8 mt-12">
                  <div className="absolute inset-0 bg-[var(--nixt-glow)]/20 blur-3xl rounded-full" />
                  <GraduationCap size={96} className="relative text-[var(--nixt-glow)]/80" />
                </div>
-               <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">Welcome to CircuitAI</h2>
-               <p className="text-[15px] text-[var(--nixt-text-dim)] mb-8 max-w-md text-center leading-relaxed">
-                 Upload a circuit diagram to start learning.<br/>
-                 We'll identify components, build equations, and teach you step by step.
+               <h2 className="text-4xl font-bold text-white mb-4 tracking-tight text-center">CircuitAI — Circuit Learning Platform</h2>
+               <p className="text-[16px] text-slate-300 mb-10 max-w-lg text-center leading-relaxed">
+                 Upload a circuit diagram and learn to analyze it step by step with an AI tutor.
                </p>
+               
                <button 
                  onClick={() => fileInputRef.current?.click()}
-                 className="bg-white hover:bg-[var(--nixt-glow)] text-[var(--nixt-dark)] hover:text-white font-bold tracking-widest uppercase py-4 px-10 rounded-full shadow-[0_0_30px_rgba(177,155,255,0.3)] inline-flex items-center justify-center gap-3 transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
+                 disabled={backendStatus !== 'ready'}
+                 className="bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--nixt-glow)] text-[var(--nixt-dark)] hover:text-white font-bold tracking-widest uppercase py-4 px-10 rounded-full shadow-[0_0_30px_rgba(177,155,255,0.3)] inline-flex items-center justify-center gap-3 transition-all duration-300 transform hover:scale-105 whitespace-nowrap mb-16"
                >
                  <Upload size={22} className="shrink-0" />
-                 <span>Upload Circuit</span>
+                 <span>Upload a circuit to get started</span>
                </button>
+
+               {/* Sample Circuits Grid */}
+               <div className="w-full max-w-3xl">
+                 <h3 className="text-sm font-semibold tracking-widest uppercase text-slate-500 mb-6 text-center">Or try a sample circuit</h3>
+                 <div className="grid grid-cols-3 gap-6">
+                   {[1, 2, 3].map((num) => (
+                     <button
+                       key={num}
+                       disabled={backendStatus !== 'ready'}
+                       onClick={() => loadSample(num)}
+                       className="group relative aspect-video rounded-xl overflow-hidden border border-slate-700/50 bg-slate-800/50 hover:border-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                     >
+                       <img src={`/samples/sample${num}.jpg`} alt={`Sample ${num}`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80" />
+                       <span className="absolute bottom-3 left-3 text-sm font-medium text-white shadow-sm flex items-center gap-2">
+                         <Zap size={14} className="text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity -ml-4 group-hover:ml-0" />
+                         Sample {num}
+                       </span>
+                     </button>
+                   ))}
+                 </div>
+               </div>
              </div>
           )}
 

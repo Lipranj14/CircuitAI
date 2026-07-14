@@ -19,6 +19,8 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "allowJs": true,
+    "strict": false,
+    "noImplicitAny": false,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },

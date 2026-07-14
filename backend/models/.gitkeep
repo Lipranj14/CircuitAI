@@ -1,0 +1,2 @@
+# This directory holds ML model weights (YOLO, etc.)
+# Weights are gitignored due to large file sizes.

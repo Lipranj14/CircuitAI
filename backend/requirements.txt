@@ -1,0 +1,32 @@
+# ============================================================
+# Stage 1 — AI Circuit Learning Platform
+# Backend Dependencies
+# ============================================================
+
+# --- Web Framework ---
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9
+
+# --- HTTP Client (Ollama) ---
+httpx>=0.27.0
+# ultralytics>=8.2.0          # Uncomment when YOLO weights are ready
+
+# --- OCR ---
+paddlepaddle>=2.6.0           # CPU-only; use paddlepaddle-gpu for CUDA
+paddleocr>=2.9.0
+
+# --- Computer Vision & Image Processing ---
+opencv-python-headless>=4.10.0
+numpy>=1.26.0
+Pillow>=10.4.0
+scikit-image>=0.24.0
+
+# --- Data Validation ---
+pydantic>=2.9.0
+
+# --- Config ---
+python-dotenv>=1.0.0
+
+# --- Simulation (existing) ---
+PySpice>=1.5

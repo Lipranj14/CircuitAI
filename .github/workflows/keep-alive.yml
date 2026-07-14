@@ -12,4 +12,4 @@ jobs:
       - name: Ping Backend
         run: |
           # Replace this URL with your actual Render backend URL if different
-          curl -f https://circuit-ai-backend.onrender.com/ || echo "Ping failed, but workflow continues"
+          curl -f https://circuitai-imws.onrender.com || echo "Ping failed, but workflow continues"

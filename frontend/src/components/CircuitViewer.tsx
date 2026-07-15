@@ -27,6 +27,8 @@ export const CircuitViewer: React.FC<{ nodes: Node[], edges: Edge[], onNodesChan
     removeWireBetween,
   } = useStore();
 
+  const [selectedEdgeIds, setSelectedEdgeIds] = useState<Set<string>>(new Set());
+
   // Determine which elements should be dimmed based on overlays
   const activeLoop = useMemo(() => {
     if (!activeOverlays.kvlLoops || !activeLoopId || !analysisData?.topology?.loops) return null;
@@ -124,7 +126,7 @@ export const CircuitViewer: React.FC<{ nodes: Node[], edges: Edge[], onNodesChan
       }
 
       // Selection highlight
-      if (edge.selected) {
+      if (selectedEdgeIds.has(edge.id)) {
         strokeColor = '#ec4899'; // Pink highlighting
         strokeWidth = 4;
         isDimmed = false;
@@ -142,7 +144,7 @@ export const CircuitViewer: React.FC<{ nodes: Node[], edges: Edge[], onNodesChan
         },
       };
     });
-  }, [edges, activeOverlays, simulationData, activeLoop, activeNode, activeNodeId]);
+  }, [edges, activeOverlays, simulationData, activeLoop, activeNode, activeNodeId, selectedEdgeIds]);
 
   // Make edges deletable
   const deletableEdges = useMemo(() => {
@@ -154,8 +156,11 @@ export const CircuitViewer: React.FC<{ nodes: Node[], edges: Edge[], onNodesChan
     if (externalOnNodesChange) externalOnNodesChange(changes);
   }, [externalOnNodesChange]);
 
-  // Handle edge deletions
+  // Handle edge deletions and selection
   const onEdgesChange = useCallback((changes: EdgeChange[]) => {
+    let selectedSetChanged = false;
+    const newSelected = new Set(selectedEdgeIds);
+
     for (const change of changes) {
       if (change.type === 'remove') {
         const edge = styledEdges.find(e => e.id === change.id);
@@ -163,8 +168,20 @@ export const CircuitViewer: React.FC<{ nodes: Node[], edges: Edge[], onNodesChan
           removeWireBetween(edge.source, edge.target, edge.sourceHandle || undefined, edge.targetHandle || undefined);
         }
       }
+      if (change.type === 'select') {
+        if (change.selected) {
+           newSelected.add(change.id);
+        } else {
+           newSelected.delete(change.id);
+        }
+        selectedSetChanged = true;
+      }
     }
-  }, [styledEdges, removeWireBetween]);
+    
+    if (selectedSetChanged) {
+      setSelectedEdgeIds(newSelected);
+    }
+  }, [styledEdges, removeWireBetween, selectedEdgeIds]);
 
   // Handle new connections
   const onConnect = useCallback((connection: Connection) => {

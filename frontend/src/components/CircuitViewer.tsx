@@ -122,6 +122,13 @@ export const CircuitViewer: React.FC<{ nodes: Node[], edges: Edge[], onNodesChan
       if (activeOverlays.nodeVoltages && !activeLoop && !activeNode) {
         strokeColor = '#ef4444'; // Red for voltage mode
       }
+
+      // Selection highlight
+      if (edge.selected) {
+        strokeColor = '#ec4899'; // Pink highlighting
+        strokeWidth = 4;
+        isDimmed = false;
+      }
       
       return {
         ...edge,
@@ -269,9 +276,9 @@ export const CircuitViewer: React.FC<{ nodes: Node[], edges: Edge[], onNodesChan
         <Controls className="bg-[#1C1A24] border-[var(--nixt-border)] fill-[var(--nixt-text-dim)]" />
       </ReactFlow>
 
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
-        <p className="bg-slate-900/80 backdrop-blur-sm text-slate-400 text-xs px-4 py-2 rounded-full border border-slate-800 shadow-sm flex items-center gap-2">
-          <span className="text-cyan-500 font-semibold">Tip:</span> You can select a wire and press <kbd className="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded text-[10px] font-mono border border-slate-700">Backspace</kbd> to delete it.
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 pointer-events-none w-full flex justify-center">
+        <p className="bg-slate-900/80 backdrop-blur-sm text-slate-400 text-xs px-4 py-2 rounded-full border border-slate-800 shadow-sm flex items-center gap-2 max-w-2xl text-center">
+          <span className="text-cyan-500 font-semibold shrink-0">Tip:</span> You can manually connect components, or select a wire and press <kbd className="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded text-[10px] font-mono border border-slate-700">Backspace</kbd> to delete it.
         </p>
       </div>
     </div>

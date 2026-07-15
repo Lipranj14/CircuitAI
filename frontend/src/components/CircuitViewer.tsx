@@ -268,6 +268,12 @@ export const CircuitViewer: React.FC<{ nodes: Node[], edges: Edge[], onNodesChan
         <Background color="var(--nixt-border)" gap={20} size={2} />
         <Controls className="bg-[#1C1A24] border-[var(--nixt-border)] fill-[var(--nixt-text-dim)]" />
       </ReactFlow>
+
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+        <p className="bg-slate-900/80 backdrop-blur-sm text-slate-400 text-xs px-4 py-2 rounded-full border border-slate-800 shadow-sm flex items-center gap-2">
+          <span className="text-cyan-500 font-semibold">Tip:</span> You can select a wire and press <kbd className="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded text-[10px] font-mono border border-slate-700">Backspace</kbd> to delete it.
+        </p>
+      </div>
     </div>
   );
 };

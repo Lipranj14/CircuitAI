@@ -63,6 +63,9 @@ export interface CircuitDataStore {
   // Wire management
   addWireBetween: (sourceCompId: string, targetCompId: string, sourceHandle?: string, targetHandle?: string) => void;
   removeWireBetween: (sourceCompId: string, targetCompId: string, sourceHandle?: string, targetHandle?: string) => void;
+  circuitHistory: any[];
+  undo: () => void;
+  resetCircuit: () => void;
 }
 
 export interface TutorStore {

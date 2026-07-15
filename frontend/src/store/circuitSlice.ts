@@ -3,7 +3,8 @@ import type { StoreState, CircuitDataStore } from './types';
 
 export const createCircuitSlice: StateCreator<StoreState, [], [], CircuitDataStore> = (set) => ({
   circuitJson: null,
-  setCircuitJson: (json) => set({ circuitJson: json }),
+  circuitHistory: [],
+  setCircuitJson: (json) => set({ circuitJson: json, circuitHistory: [] }),
   
   analysisData: null,
   setAnalysisData: (data) => set({ analysisData: data }),
@@ -22,6 +23,7 @@ export const createCircuitSlice: StateCreator<StoreState, [], [], CircuitDataSto
   
   updateComponentValue: (compId, newValue) => set((state) => {
     if (!state.circuitJson) return state;
+    const history = [...state.circuitHistory, JSON.parse(JSON.stringify(state.circuitJson))];
     const newCircuit = { ...state.circuitJson };
     newCircuit.components = newCircuit.components.map((c: any) => {
       if (c.id === compId) {
@@ -29,7 +31,7 @@ export const createCircuitSlice: StateCreator<StoreState, [], [], CircuitDataSto
       }
       return c;
     });
-    return { circuitJson: newCircuit };
+    return { circuitJson: newCircuit, circuitHistory: history };
   }),
   
   suggestedRepairs: [],
@@ -40,6 +42,7 @@ export const createCircuitSlice: StateCreator<StoreState, [], [], CircuitDataSto
   
   applyRepair: (repairId) => set((state) => {
     if (!state.circuitJson) return state;
+    const history = [...state.circuitHistory, JSON.parse(JSON.stringify(state.circuitJson))];
     
     // Search in suggestedRepairs first
     let repair = state.suggestedRepairs.find(r => r.id === repairId);
@@ -91,6 +94,7 @@ export const createCircuitSlice: StateCreator<StoreState, [], [], CircuitDataSto
 
   addWireBetween: (sourceCompId, targetCompId, _sourceHandle, _targetHandle) => set((state) => {
     if (!state.circuitJson) return state;
+    const history = [...state.circuitHistory, JSON.parse(JSON.stringify(state.circuitJson))];
     const newCircuit = JSON.parse(JSON.stringify(state.circuitJson));
     
     const sourceComp = newCircuit.components.find((c: any) => c.id === sourceCompId);
@@ -126,11 +130,12 @@ export const createCircuitSlice: StateCreator<StoreState, [], [], CircuitDataSto
     });
     
     newCircuit.nodes = newCircuit.nodes.filter((n: any) => n.connected_pins.length > 0);
-    return { circuitJson: newCircuit };
+    return { circuitJson: newCircuit, circuitHistory: history };
   }),
 
   removeWireBetween: (sourceCompId, targetCompId, _sourceHandle, _targetHandle) => set((state) => {
     if (!state.circuitJson) return state;
+    const history = [...state.circuitHistory, JSON.parse(JSON.stringify(state.circuitJson))];
     const newCircuit = JSON.parse(JSON.stringify(state.circuitJson));
     
     for (const node of newCircuit.nodes) {
@@ -152,6 +157,19 @@ export const createCircuitSlice: StateCreator<StoreState, [], [], CircuitDataSto
     }
     
     newCircuit.nodes = newCircuit.nodes.filter((n: any) => n.connected_pins.length > 0);
-    return { circuitJson: newCircuit };
+    return { circuitJson: newCircuit, circuitHistory: history };
+  }),
+
+  undo: () => set((state) => {
+    if (state.circuitHistory.length === 0) return state;
+    const history = [...state.circuitHistory];
+    const previous = history.pop();
+    return { circuitJson: previous, circuitHistory: history };
+  }),
+  
+  resetCircuit: () => set((state) => {
+    if (state.circuitHistory.length === 0) return state;
+    const initial = state.circuitHistory[0];
+    return { circuitJson: initial, circuitHistory: [] };
   }),
 });

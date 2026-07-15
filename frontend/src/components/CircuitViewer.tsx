@@ -5,6 +5,7 @@ import 'reactflow/dist/style.css';
 import { useStore } from '../store/useStore';
 import { CircuitNode } from './CircuitNode';
 import { BackgroundNode } from './BackgroundNode';
+import { Undo2, RotateCcw } from 'lucide-react';
 
 const nodeTypes = {
   component: CircuitNode,
@@ -25,6 +26,9 @@ export const CircuitViewer: React.FC<{ nodes: Node[], edges: Edge[], onNodesChan
     setSelectedComponentId,
     addWireBetween,
     removeWireBetween,
+    undo,
+    resetCircuit,
+    circuitHistory
   } = useStore();
 
   const [selectedEdgeIds, setSelectedEdgeIds] = useState<Set<string>>(new Set());
@@ -263,6 +267,24 @@ export const CircuitViewer: React.FC<{ nodes: Node[], edges: Edge[], onNodesChan
           className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${activeOverlays.equations ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(5,150,105,0.4)]' : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'}`}
           onClick={() => toggleOverlay('equations')}
         >Equation Overlay</button>
+      </div>
+
+      {/* Undo/Reset Controls */}
+      <div className="absolute top-4 right-4 z-10 flex gap-2">
+        <button 
+          className="bg-slate-900/90 backdrop-blur-md text-slate-300 hover:text-white hover:bg-slate-700 px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-700 shadow-lg flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          onClick={() => undo()}
+          disabled={circuitHistory.length === 0}
+        >
+          <Undo2 size={14} /> Undo
+        </button>
+        <button 
+          className="bg-slate-900/90 backdrop-blur-md text-slate-300 hover:text-red-400 hover:bg-red-950/50 px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-700 shadow-lg flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          onClick={() => resetCircuit()}
+          disabled={circuitHistory.length === 0}
+        >
+          <RotateCcw size={14} /> Reset
+        </button>
       </div>
 
       <ReactFlow
